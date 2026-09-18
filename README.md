@@ -16,6 +16,12 @@
 - 검색·생성 방식을 바꿀 때마다 질문셋으로 측정하고, 기본값은 측정 전에 정한 규칙으로 판단함 (실험 v1~v10)
 - 한국어 질문은 한국어 번역 문서에서 찾아 한국어로 답함 (언어별 임베딩 모델과 벡터 인덱스)
 
+**[bike-demand](https://github.com/hyeonbin123/bike-demand)**: 서울 따릉이 대여소별 시간당 대여 수를 예측하고, 곧 자전거가 부족해질 대여소를 지도로 보여 주는 데이터 파이프라인·서비스
+
+- 대여이력 1억 4천만 건을 dbt-duckdb로 집계, Airflow가 실시간 대여정보(10분)와 단기예보를 모아 앞으로 48시간을 예측, FastAPI + 지도 대시보드
+- 후보와 판정 규칙을 측정 전에 커밋하고 시간 순서로 검증함. 검토에서 찾은 학습 데이터 누수 두 가지를 고쳐 다시 측정 (test MAE 1.044, 기준선 1.185)
+- Airflow, dbt, DuckDB, PostgreSQL, LightGBM, FastAPI, Docker Compose
+
 #### 경력
 
 - 주식회사 엘젠 (2024.01 ~ 2025.02, 1년 2개월): 음성인식·챗봇·자연어처리 개발
@@ -33,6 +39,7 @@
 
 - 백엔드: Python, FastAPI, Django, Flask, SQLAlchemy 2.0(async), PostgreSQL + pgvector, MySQL, WebSocket, Docker, GitHub Actions
 - 음성·AI: Whisper 파인튜닝·평가, faster-whisper, CTranslate2, PyTorch, TensorFlow, Hugging Face Transformers, sentence-transformers, LangChain, Ollama
+- 데이터: Airflow, dbt, DuckDB, LightGBM
 - 프론트엔드: React, TypeScript
 
 #### 기타 경험
