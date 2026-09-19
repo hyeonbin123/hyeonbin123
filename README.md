@@ -16,6 +16,12 @@
 - 검색·생성 방식을 바꿀 때마다 질문셋으로 측정하고, 기본값은 측정 전에 정한 규칙으로 판단함 (실험 v1~v10)
 - 한국어 질문은 한국어 번역 문서에서 찾아 한국어로 답함 (언어별 임베딩 모델과 벡터 인덱스)
 
+**[whisper-ko-ft](https://github.com/hyeonbin123/whisper-ko-ft)**: 공개 한국어 음성 데이터(Zeroth-Korean)로 Whisper를 파인튜닝하고, 미리 정한 규칙으로 전후를 측정한 프로젝트
+
+- whisper-small 전체 파인튜닝과 whisper-large-v3-turbo LoRA. turbo + LoRA로 같은 도메인 CER 4.48% → 1.96% (test, 한 번 측정)
+- 좋아진 것만이 아니라 잃은 것도 잼: 다른 도메인(FLEURS)은 허용 폭을 넘게 나빠져 "도메인 전용"으로 판정. 원인이 숫자 표기 차이("5월"과 "오 월")라는 것, 파인튜닝한 작은 모델에서만 나오는 되풀이 오류를 추론 엔진의 재시도로 막을 수 있다는 것을 확인
+- PyTorch, Hugging Face Transformers, PEFT(LoRA), faster-whisper, 부트스트랩 신뢰구간, GitHub Actions
+
 **[bike-demand](https://github.com/hyeonbin123/bike-demand)**: 서울 따릉이 대여소별 시간당 대여 수를 예측하고, 곧 자전거가 부족해질 대여소를 지도로 보여 주는 데이터 파이프라인·서비스
 
 - 대여이력 1억 4천만 건을 dbt-duckdb로 집계, Airflow가 실시간 대여정보(10분)와 단기예보를 모아 앞으로 48시간을 예측, FastAPI + 지도 대시보드
@@ -38,7 +44,7 @@
 #### 기술
 
 - 백엔드: Python, FastAPI, Django, Flask, SQLAlchemy 2.0(async), PostgreSQL + pgvector, MySQL, WebSocket, Docker, GitHub Actions
-- 음성·AI: Whisper 파인튜닝·평가, faster-whisper, CTranslate2, PyTorch, TensorFlow, Hugging Face Transformers, sentence-transformers, LangChain, Ollama
+- 음성·AI: Whisper 파인튜닝·평가(전체, LoRA), PEFT, faster-whisper, CTranslate2, PyTorch, TensorFlow, Hugging Face Transformers, sentence-transformers, LangChain, Ollama
 - 데이터: Airflow, dbt, DuckDB, LightGBM
 - 프론트엔드: React, TypeScript
 
