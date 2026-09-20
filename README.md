@@ -19,7 +19,8 @@
 **[whisper-ko-ft](https://github.com/hyeonbin123/whisper-ko-ft)**: 공개 한국어 음성 데이터(Zeroth-Korean)로 Whisper를 파인튜닝하고, 미리 정한 규칙으로 전후를 측정한 프로젝트
 
 - whisper-small 전체 파인튜닝과 whisper-large-v3-turbo LoRA. turbo + LoRA로 같은 도메인 CER 4.48% → 1.96% (test, 한 번 측정)
-- 좋아진 것만이 아니라 잃은 것도 잼: 다른 도메인(FLEURS)은 허용 폭을 넘게 나빠져 "도메인 전용"으로 판정. 원인이 숫자 표기 차이("5월"과 "오 월")라는 것, 파인튜닝한 작은 모델에서만 나오는 되풀이 오류를 추론 엔진의 재시도로 막을 수 있다는 것을 확인
+- 좋아진 것만이 아니라 잃은 것도 잼: 다른 도메인(FLEURS)은 허용 폭을 넘게 나빠져 "도메인 전용"으로 판정. 파인튜닝한 모델에서만 드물게 나오는 되풀이 오류를 추론 엔진의 재시도로 막을 수 있다는 것도 확인
+- 나빠진 원인이 숫자 표기 차이("5월"과 "오 월")임을 확인하고 학습 정답의 표기를 바꿔 다시 학습: 같은 이득을 지키면서 다른 도메인 CER 6.94% → 5.55%(기준선 5.21%), 판정이 "범용으로 쓸 수 있다"로 바뀜
 - PyTorch, Hugging Face Transformers, PEFT(LoRA), faster-whisper, 부트스트랩 신뢰구간, GitHub Actions
 
 **[bike-demand](https://github.com/hyeonbin123/bike-demand)**: 서울 따릉이 대여소별 시간당 대여 수를 예측하고, 곧 자전거가 부족해질 대여소를 지도로 보여 주는 데이터 파이프라인·서비스
