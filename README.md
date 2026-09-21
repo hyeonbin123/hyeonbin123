@@ -4,6 +4,13 @@
 
 #### 대표 프로젝트
 
+**[support-agent](https://github.com/hyeonbin123/support-agent)**: 한국어 고객센터 업무(주문 조회·취소, 반품·교환 접수, 배송지 변경, 보상 쿠폰, 상담원 이관)를 도구 호출로 처리하는 LLM 상담 에이전트와, 그 에이전트가 얼마나 믿을 만한지를 미리 정한 규칙으로 재는 평가 환경
+
+- τ-bench 방식: 고객 역할은 LLM 시뮬레이터, 판정은 LLM이 아니라 "끝난 뒤의 DB 상태가 정답 동작만 실행한 상태와 같은가". 같은 과제를 4번씩 시켜 pass^k와 규정 위반 수를 냄. 로컬 7B는 시험용 과제의 16.2%만 끝까지 처리했고, 개선 후보 5개는 모두 기준을 넘지 못해 "개선 없음"으로 기록
+- 고객의 말이 음성 합성 → 음성 인식을 거치면 성공률이 1.9%로 떨어지고(글자 오류율은 7.6%지만 주문 번호·이메일이 한 번도 그대로 전달되지 않음), 표기 규칙 네 개로 8.8%까지 되찾음
+- 같은 에이전트를 웹 채팅 서비스(SSE, PostgreSQL, 감사 로그, 큰 환불의 사람 승인 대기열), MCP 서버, 음성 채널로 확장. 테스트 1,077개, CI에서 실제 PostgreSQL 통합 테스트, DAST 스캔
+- Python, FastAPI, SQLAlchemy 2.0, Alembic, PostgreSQL, Ollama, MCP, MeloTTS, faster-whisper, Docker Compose, GitHub Actions
+
 **[voice-translator](https://github.com/hyeonbin123/voice-translator)**: 영어↔한국어 음성 번역 웹 서비스. 말하면 음성 인식 → 번역 → 음성 합성을 거쳐 원문·번역문과 번역 음성을 돌려줌
 
 - 대화 모드, 동시통역(WebSocket으로 말하는 동안 자막 갱신), 두 사람 대화(한 마디마다 한국어·영어 자동 판별)
@@ -44,8 +51,8 @@
 
 #### 기술
 
-- 백엔드: Python, FastAPI, Django, Flask, SQLAlchemy 2.0(async), PostgreSQL + pgvector, MySQL, WebSocket, Docker, GitHub Actions
-- 음성·AI: Whisper 파인튜닝·평가(전체, LoRA), PEFT, faster-whisper, CTranslate2, PyTorch, TensorFlow, Hugging Face Transformers, sentence-transformers, LangChain, Ollama
+- 백엔드: Python, FastAPI, Django, Flask, SQLAlchemy 2.0(async), PostgreSQL + pgvector, MySQL, WebSocket, SSE, MCP, Docker, GitHub Actions
+- 음성·AI: Whisper 파인튜닝·평가(전체, LoRA), PEFT, faster-whisper, CTranslate2, MeloTTS, PyTorch, TensorFlow, Hugging Face Transformers, sentence-transformers, LangChain, Ollama, LLM 도구 호출 에이전트와 τ-bench 방식 평가
 - 데이터: Airflow, dbt, DuckDB, LightGBM
 - 프론트엔드: React, TypeScript
 
