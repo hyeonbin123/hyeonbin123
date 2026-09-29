@@ -4,6 +4,14 @@
 
 #### 대표 프로젝트
 
+**[call-summary](https://github.com/hyeonbin123/call-summary)**: 고객센터 상담 대화 전사를 상담 기록(문의 유형, 처리 결과, 핵심 값, 처리 목록, 후속 조치, 요약)의 JSON으로 바꾸는 소형 LLM을 직접 학습하고, 음성 인식을 거친 전사 조건과 서빙까지 미리 정한 규칙으로 잰 프로젝트
+
+- 공개 데이터가 없어 정답을 먼저 만듦: seed 고정 명세 생성기가 정답을 정하고, 교사 모델(qwen2.5 14B)은 대화만 쓰고, 명세에 없는 번호·금액이 나온 대화는 코드가 버림. 합성 데이터의 점수 부풀림을 보려고 다른 모델이 쓴 대화와 학습에서 뺀 업종을 따로 시험 세트로 둠
+- Qwen3-4B QLoRA(RTX 2080 Ti, fp16)로 구조 필드가 모두 맞은 비율을 학습 전 17.3% → 95.7%(학습 안 한 14B 26.0%). 다른 모델이 쓴 대화 90.0%, 학습에 없던 업종 55.0%로 이득이 줄어드는 폭까지 기록
+- 음성 합성 → 전화 음질 → Whisper를 거친 전사에서는 51.7%로 떨어지고, 학습 데이터 절반을 음성 인식 전사로 바꾸면 80.7%(글 전사 성능은 그대로). 인식 오류를 바로잡은 값과 지어낸 값을 나눠 셈
+- GGUF(llama.cpp 양자화) + Ollama + FastAPI 서빙. JSON 스키마 강제 디코딩과 QLoRA 합치기 방식이 품질을 떨어뜨리는 원인을 찾아 고쳐 서비스 점수 = 학습한 모델(dev 94.6%). 부하 시험, Docker, DAST 스캔, 테스트 106개
+- PyTorch, Hugging Face Transformers, PEFT(LoRA·QLoRA), bitsandbytes, llama.cpp, Ollama, FastAPI, MeloTTS, faster-whisper, GitHub Actions
+
 **[support-agent](https://github.com/hyeonbin123/support-agent)**: 한국어 고객센터 업무(주문 조회·취소, 반품·교환 접수, 배송지 변경, 보상 쿠폰, 상담원 이관)를 도구 호출로 처리하는 LLM 상담 에이전트와, 그 에이전트가 얼마나 믿을 만한지를 미리 정한 규칙으로 재는 평가 환경
 
 - τ-bench 방식: 고객 역할은 LLM 시뮬레이터, 판정은 LLM이 아니라 "끝난 뒤의 DB 상태가 정답 동작만 실행한 상태와 같은가". 같은 과제를 4번씩 시켜 pass^k와 규정 위반 수를 냄. 로컬 7B는 시험용 과제의 16.2%만 끝까지 처리했고, 개선 후보 5개는 모두 기준을 넘지 못해 "개선 없음"으로 기록
@@ -53,7 +61,7 @@
 #### 기술
 
 - 백엔드: Python, FastAPI, Django, Flask, SQLAlchemy 2.0(async), PostgreSQL + pgvector, MySQL, WebSocket, SSE, MCP, Docker, GitHub Actions
-- 음성·AI: Whisper 파인튜닝·평가(전체, LoRA), PEFT, faster-whisper, CTranslate2, MeloTTS, PyTorch, TensorFlow, Hugging Face Transformers, sentence-transformers, LangChain, Ollama, LLM 도구 호출 에이전트와 τ-bench 방식 평가
+- 음성·AI: Whisper 파인튜닝·평가(전체, LoRA), 소형 LLM 파인튜닝(QLoRA)과 GGUF 서빙, PEFT, faster-whisper, CTranslate2, MeloTTS, PyTorch, TensorFlow, Hugging Face Transformers, sentence-transformers, LangChain, Ollama, LLM 도구 호출 에이전트와 τ-bench 방식 평가
 - 데이터: Airflow, dbt, DuckDB, LightGBM
 - 프론트엔드: React, TypeScript
 
