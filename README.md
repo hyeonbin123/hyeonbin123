@@ -4,6 +4,15 @@
 
 #### 대표 프로젝트
 
+**[ride-insight](https://github.com/hyeonbin123/ride-insight)**: 사이클링 파워미터 데이터(FIT 파일)를 받아 훈련 지표(NP·IF·TSS, 파워 커브, CTL/ATL/TSB)를 계산하고 FTP를 추정하는 웹 서비스. 지표 구현의 정확성, FTP 추정 방법, 변조 FIT 처리를 미리 정한 규칙으로 재고, AI 코딩 도구(Claude Code, Codex)가 만든 코드를 어떻게 검증했고 무엇이 잡혔는지를 기능마다 기록한 프로젝트
+
+- 서버는 Kotlin(Spring Boot 4, JdbcClient + Flyway, PostgreSQL), 모델 실험은 Python, 화면은 React + D3. FIT 디코더는 Garmin SDK의 라이선스가 공개 저장소에 맞지 않아 직접 구현하고 python-fitparse의 디코딩 결과(레코드 31,156개)와 대조하는 테스트를 둠(버그 2개를 이 테스트가 잡음)
+- 직접 구현한 지표를 GoldenCheetah OpenData(CC0, 선수 6,613명 중 표본 800명)의 값과 대조: 봉인 세트(선수 100명, 라이딩 32,907개 중 1초 기록 31,150개)에서 NP 99.61%, 16구간 MMP 99.65%가 1 W 안, TSS 99.97%(GoldenCheetah가 실제로 쓴 임계값으로 다시 계산, 정수·부재 TSS 제외)가 0.5 안에서 일치. 라이딩의 10~13%는 GoldenCheetah가 IF·TSS에 CP 설정이 아닌 존 FTP를 썼고 정수 TSS는 수동 입력으로 추정되어, 이 둘을 구분해야 구현 차이가 보인다는 것을 기록
+- FTP 추정(봉인 test 선수 123명, 예측 단위 1,586개): 흔한 규칙 "20분 최대 × 0.95"는 선수가 설정한 FTP와 MAE 29.2 W [25.3, 33.6]이고 17 W 낮게 치우침(과대 추정한다는 가설 기각). dev에서 고른 Ridge는 22.9 W로 규칙보다 6.3 W [−9.1, −3.0] 가까웠지만 미리 정한 "5 W 이상 개선"을 구간으로 확정하지 못해 규칙대로 서비스는 규칙을 쓰고 오차를 함께 보여 줌(test에서 더 좋았던 LightGBM 20.6 W도 채택하지 않음)
+- 변조 FIT 7종(크기 필드 조작, CRC, 정의 없는 데이터, 역행 타임스탬프, 10 MB 초과)이 모두 미리 적은 상태 코드를 돌려주고 500 없음. OWASP ZAP 1차가 존재하지 않는 경로에 500을 돌려주던 예외 처리기 버그와 보안 헤더 누락을 잡아 고쳤고, 2차는 High·Medium 0(5xx 12% → 0%). 동시 업로드 10개 p95 0.33~0.64 s
+- Codex 읽기 전용 검토 세 번 35건(봉인 규칙의 누수 허용, NaN 전파, 체인 블록별 메시지 상한, 신선 라벨 정의 불일치, 측정 조건 위반 등)을 반영. 테스트 Kotlin 47·Python 28·화면 5개, Docker Compose 전체 스택, GitHub Actions
+- Kotlin, Spring Boot, JdbcClient, Flyway, PostgreSQL, Testcontainers, Python, scikit-learn, LightGBM, React, TypeScript, D3, MUI, React Query, Zustand, Docker Compose, GitHub Actions, OWASP ZAP
+
 **[defect-inspect](https://github.com/hyeonbin123/defect-inspect)**: 정상 제품 사진만으로 만드는 외관 검사기(이상 탐지)를, 현장에서 실제로 굴릴 때 부딪히는 질문(결함 라벨이 몇 장 필요한가, 정상 이미지로 정한 임계값이 지켜지나, 합성 교란으로 실제 조명 변화를 대신할 수 있나, CPU로 충분한가)으로 미리 정한 규칙에 따라 잰 프로젝트
 
 - PatchCore(WideResNet-50·DINOv2 특징, 코어셋)를 직접 구현해 Dinomaly, 고정한 DINOv2 특징 위에 결함 k장으로 학습한 지도 학습 헤드와 비교. 봉인 테스트(VisA 공식 분할의 test 4,328장)는 단계마다 정해 둔 것만 한 번 재고, 읽을 때마다 기록을 남김. 이미지 AUROC는 PatchCore 89.3(WRN-50)·94.1(DINOv2), Dinomaly 96.8. 지도 학습은 범주당 결함 5장(검증 포함 25장)이면 Dinomaly와 구별되지 않고 20장(검증 포함 40장)부터 분명히 앞서지만(+1.6%p), 학습에 없던 결함 유형만 보면 2.1~3.5%p 뒤짐(k = 5·10)
@@ -74,11 +83,11 @@
 
 #### 기술
 
-- 백엔드: Python, FastAPI, Django, Flask, SQLAlchemy 2.0(async), PostgreSQL + pgvector, MySQL, WebSocket, SSE, MCP, Docker, GitHub Actions, DAST(OWASP ZAP)
+- 백엔드: Python, FastAPI, Django, Flask, SQLAlchemy 2.0(async), Kotlin, Spring Boot(JdbcClient·Flyway, Testcontainers), PostgreSQL + pgvector, MySQL, WebSocket, SSE, MCP, Docker, GitHub Actions, DAST(OWASP ZAP)
 - 음성·AI: Whisper 파인튜닝·평가(전체, LoRA), Qwen3-ASR, 소형 LLM 파인튜닝(QLoRA)과 GGUF 서빙, PEFT, faster-whisper, CTranslate2, MeloTTS, PyTorch, TensorFlow, Hugging Face Transformers, sentence-transformers, LangChain, Ollama, LLM 도구 호출 에이전트와 τ-bench 방식 평가, LLM 판정 보정
 - 컴퓨터 비전: 이상 탐지(PatchCore 직접 구현, Dinomaly), DINOv2·WideResNet-50 특징, ONNX Runtime CPU 서빙과 INT8 양자화 평가, OpenVINO(비교), timm
-- 데이터: Airflow, dbt, DuckDB, LightGBM
-- 프론트엔드: React, TypeScript
+- 데이터: Airflow, dbt, DuckDB, LightGBM, scikit-learn
+- 프론트엔드: React, TypeScript, D3, MUI, React Query, Zustand
 
 #### 기타 경험
 
