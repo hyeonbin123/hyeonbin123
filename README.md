@@ -4,6 +4,15 @@
 
 #### 대표 프로젝트
 
+**[stt-scratch](https://github.com/hyeonbin123/stt-scratch)**: 한국어 음성 인식 모델을 사전학습 가중치 없이 처음부터 설계·학습하고, 마이크 입력에 부분 자막을 돌려주는 스트리밍 서비스로 묶은 프로젝트. 단계마다 가설과 판정 기준을 측정 전에 커밋하고 test는 마지막에 한 번만 잼
+
+- PyTorch로 직접 구현한 21M 청크 인과 Conformer-CTC(RoPE·QK-norm, 분할 depthwise conv, 동적 청크 학습, 캐시 스트리밍). 공개 데이터 51.8 h(Zeroth-Korean·FLEURS·Common Voice 22), RTX 2080 Ti 한 장 fp16. Zeroth 공식 test 문장의 99.8%가 Zeroth train에 있어 문장 단위 홀드아웃을 따로 둠
+- 'fp16 발산'처럼 보이던 학습 정지는 CTC 손실 코드 버그 2개, 정렬이 생기지 않던 것은 처음부터 건 SpecAugment가 원인임을 진단으로 확인해 커리큘럼으로 고침(따로 관측한 어텐션 로짓 폭주에는 QK-norm). 같은 업데이트 step 수로 맞춘 구조 비교에서 E-Branchformer·CR-CTC는 채택 기준을 넘지 못함
+- 봉인 test: Zeroth 공식 test CER 3.67%로 whisper-large-v3-turbo 제로샷(4.48%)과 LoRA(1.96%) 사이. 다만 학습 세트에 있는 문장 1.85%, 처음 보는 문장 16.01%로 문장 암기와 일관됨. 처음 보는 문장만 모은 test_H 15.55%, FLEURS 한글 전용 14.62%, Common Voice 28.19%
+- 스트리밍 서버(FastAPI WebSocket): 실제 캐시 스트리밍 = 시뮬레이션(0.03포인트 안), 패킷 송신 → 부분 자막 p50 62 ms(청크 대기 제외), 끝점 확정 EP50 1.3 s. GPU 계산 목표 50 ms를 못 지킨 것(p90 63 ms, 커널 실행 호출이 병목인 것으로 보임)과 첫 요청 0.5 s 지연을 예열로 고친 것을 기록. OWASP ZAP으로 찾은 보안 헤더 누락을 고침
+- Codex 읽기 전용 독립 검토 일곱 번 84건 반영, 테스트 87개
+- PyTorch, torchaudio, Conformer-CTC, Montreal Forced Aligner, FastAPI, WebSocket, OWASP ZAP
+
 **[ride-insight](https://github.com/hyeonbin123/ride-insight)**: 사이클링 파워미터 데이터(FIT 파일)를 받아 훈련 지표(NP·IF·TSS, 파워 커브, CTL/ATL/TSB)를 계산하고 FTP를 추정하는 웹 서비스. 지표 구현의 정확성, FTP 추정 방법, 변조 FIT 처리를 미리 정한 규칙으로 재고, AI 코딩 도구(Claude Code, Codex)가 만든 코드를 어떻게 검증했고 무엇이 잡혔는지를 기능마다 기록한 프로젝트
 
 - 서버는 Kotlin(Spring Boot 4, JdbcClient + Flyway, PostgreSQL), 모델 실험은 Python, 화면은 React + D3. FIT 디코더는 Garmin SDK의 라이선스가 공개 저장소에 맞지 않아 직접 구현하고 python-fitparse의 디코딩 결과(레코드 31,156개)와 대조하는 테스트를 둠(버그 2개를 이 테스트가 잡음)
@@ -84,7 +93,7 @@
 #### 기술
 
 - 백엔드: Python, FastAPI, Django, Flask, SQLAlchemy 2.0(async), Kotlin, Spring Boot(JdbcClient·Flyway, Testcontainers), PostgreSQL + pgvector, MySQL, WebSocket, SSE, MCP, Docker, GitHub Actions, DAST(OWASP ZAP)
-- 음성·AI: Whisper 파인튜닝·평가(전체, LoRA), Qwen3-ASR, 소형 LLM 파인튜닝(QLoRA)과 GGUF 서빙, PEFT, faster-whisper, CTranslate2, MeloTTS, PyTorch, TensorFlow, Hugging Face Transformers, sentence-transformers, LangChain, Ollama, LLM 도구 호출 에이전트와 τ-bench 방식 평가, LLM 판정 보정
+- 음성·AI: Whisper 파인튜닝·평가(전체, LoRA), Qwen3-ASR, 소형 LLM 파인튜닝(QLoRA)과 GGUF 서빙, PEFT, faster-whisper, CTranslate2, MeloTTS, PyTorch, TensorFlow, Hugging Face Transformers, sentence-transformers, LangChain, Ollama, LLM 도구 호출 에이전트와 τ-bench 방식 평가, LLM 판정 보정, CTC 음성 인식 모델 처음부터 설계·학습(Conformer, 캐시 스트리밍)
 - 컴퓨터 비전: 이상 탐지(PatchCore 직접 구현, Dinomaly), DINOv2·WideResNet-50 특징, ONNX Runtime CPU 서빙과 INT8 양자화 평가, OpenVINO(비교), timm
 - 데이터: Airflow, dbt, DuckDB, LightGBM, scikit-learn
 - 프론트엔드: React, TypeScript, D3, MUI, React Query, Zustand
