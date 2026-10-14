@@ -7,7 +7,7 @@
 **[stt-scratch](https://github.com/hyeonbin123/stt-scratch)**: 한국어 음성 인식 모델을 사전학습 가중치 없이 처음부터 설계·학습하고, 마이크 입력에 부분 자막을 돌려주는 스트리밍 서비스로 묶은 프로젝트. 단계마다 가설과 판정 기준을 측정 전에 커밋하고 test는 마지막에 한 번만 잼
 
 - PyTorch로 직접 구현한 21M 청크 인과 Conformer-CTC(RoPE·QK-norm, 분할 depthwise conv, 동적 청크 학습, 캐시 스트리밍). 공개 데이터 51.8 h(Zeroth-Korean·FLEURS·Common Voice 22), RTX 2080 Ti 한 장 fp16. Zeroth 공식 test 문장의 99.8%가 Zeroth train에 있어 문장 단위 홀드아웃을 따로 둠
-- 'fp16 발산'처럼 보이던 학습 정지는 CTC 손실 코드 버그 2개, 정렬이 생기지 않던 것은 처음부터 건 SpecAugment가 원인임을 진단으로 확인해 커리큘럼으로 고침(따로 관측한 어텐션 로짓 폭주에는 QK-norm). 같은 업데이트 step 수로 맞춘 구조 비교에서 E-Branchformer·CR-CTC는 채택 기준을 넘지 못함
+- "fp16 발산"처럼 보이던 학습 정지는 CTC 손실 코드 버그 2개, 정렬이 생기지 않던 것은 처음부터 건 SpecAugment가 원인임을 진단으로 확인해 커리큘럼으로 고침(따로 관측한 어텐션 로짓 폭주에는 QK-norm). 같은 업데이트 step 수로 맞춘 구조 비교에서 E-Branchformer·CR-CTC는 채택 기준을 넘지 못함
 - 봉인 test: Zeroth 공식 test CER 3.67%로 whisper-large-v3-turbo 제로샷(4.48%)과 LoRA(1.96%) 사이. 다만 학습 세트에 있는 문장 1.85%, 처음 보는 문장 16.01%로 문장 암기와 일관됨. 처음 보는 문장만 모은 test_H 15.55%, FLEURS 한글 전용 14.62%, Common Voice 28.19%
 - 스트리밍 서버(FastAPI WebSocket): 실제 캐시 스트리밍 = 시뮬레이션(0.03포인트 안), 패킷 송신 → 부분 자막 p50 62 ms(청크 대기 제외), 끝점 확정 EP50 1.3 s. GPU 계산 목표 50 ms를 못 지킨 것(p90 63 ms, 커널 실행 호출이 병목인 것으로 보임)과 첫 요청 0.5 s 지연을 예열로 고친 것을 기록. OWASP ZAP으로 찾은 보안 헤더 누락을 고침
 - Codex 읽기 전용 독립 검토 일곱 번 84건 반영, 테스트 87개
